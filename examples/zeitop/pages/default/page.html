@@ -1,0 +1,45 @@
+<div class="center container">
+    <div id="clock" class="flex column">
+        <span id="hour"></span>
+        <span id="min"></span>
+    </div>
+    <div id="panel" class="flex column">
+        <div id="info" class="flex column">
+            <div class="flex">
+                <div>
+                    <span id="user"></span>
+                    @
+                    <span id="host"></span>
+                </div>
+                <span class="lmauto" id="uptime"></span>
+            </div>
+            <hr>
+            <div id="sysinfo">
+                <span id="cpu">CPU</span>
+                <span id="cpu-bar" class="bar"></span>
+                <span id="cpu-percent" class="lmauto">0%</span>
+                <span id="mem">MEM</span>
+                <span id="mem-bar" class="bar"></span>
+                <span id="mem-val" class="lmauto">00.00GB</span>
+            </div>
+        </div>
+        <div id="music" class="flex column">
+            <div id="detail" class="flex">
+                <span id="title"></span>
+                -
+                <span id="artists"></span>
+            </div>
+            <span id="music-bar" class="bar"></span>
+            <div id="music-controls" class="flex">
+                <span id="music-elapsed"></span>
+                <div id="music-controls-buttons" class="flex">
+                    <span id="music-prev">&lt;</span>
+                    <span id="music-play-pause">|&gt;</span>
+                    <span id="music-next">&gt;</span>
+                </div>
+                <span id="music-duration"></span>
+            </div>
+        </div>
+    </div>
+    <div id="dbg"></div>
+</div>
