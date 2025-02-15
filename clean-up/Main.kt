@@ -22,7 +22,7 @@ class Client(uri: URI) : WebSocketClient(uri) {
     override fun onClose(code: Int, reason: String, remote: Boolean) {
         println(code);
         println(reason);
-        Runtime.getRuntime().exec("pm uninstall com.z3phyrl.Deskr").waitFor()
+        Runtime.getRuntime().exec("pm uninstall com.z3phyrl.zeitop").waitFor()
     }
     override fun onError(ex: Exception) {
     }
