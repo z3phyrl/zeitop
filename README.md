@@ -2,6 +2,8 @@
 
 Use android phone as a desktop clock and more.
 
+![demo](demo.gif)
+
 ## **WARNING**
 - this project is ***unfinished****(barely working)*.
 - need some setup for everything to work.
