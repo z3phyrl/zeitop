@@ -8,9 +8,9 @@ anyhow = "1.0.95"
 bytes = "1.10.0"
 clap = "4.5.27"
 futures = "0.3.31"
-mpd = { version = "0.1.0", features = ["serde"] }
+mozdevice = "0.5.4"
 mpd_client = "1.4.1"
-rusb = "0.9.4"
+nusb = "0.1.13"
 sass-rs = "0.2.2"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.138"
@@ -19,4 +19,3 @@ tokio = { version = "1.43.0", features = ["full"] }
 tokio-tungstenite = "0.26.1"
 toml = "0.8.19"
 tungstenite = "0.26.1"
-usb-ids = "1.2025.1"

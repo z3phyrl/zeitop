@@ -34,6 +34,7 @@ pub struct Config {
 impl Config {
     pub fn default_dir() -> Result<PathBuf> {
         if let Some(env) = env::var_os("XDG_CONFIG_HOME") {
+            println!("{env:?}");
             Ok(Path::new(&env).join("zeitop/"))
         } else {
             if let Some(env) = env::var_os("HOME") {

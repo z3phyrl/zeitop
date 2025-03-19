@@ -21,22 +21,18 @@ async fn main() -> Result<()> {
     let config = Config {
         device_config: DeviceConfig::default(),
     };
-    let dev_handler = DeviceHandler::new(config.device_config.clone())?;
+    DeviceHandler::new(config.device_config.clone()).await?;
     let server = Server::new(
         config.device_config.local_port,
-        dev_handler.device_map.clone(),
     )
     .await?;
-    tokio::spawn(async move {
+    let server_handler = tokio::spawn(async move {
         loop {
             let _ = server.handle().await;
         }
     });
     run_default_service().await?;
-    spawn_blocking(move || loop {
-        dev_handler.handle();
-    })
-    .await?;
+    server_handler.await?;
     Ok(())
 }
 

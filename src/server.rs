@@ -1,4 +1,4 @@
-use crate::device::{Device, DeviceMap, Serial};
+// use crate::device::{Device, DeviceMap, Serial};
 use anyhow::{Error, Result};
 use bytes::Bytes;
 use futures::{
@@ -25,7 +25,6 @@ use crate::service::{RequestHandler, Service, ServiceMap, ServiceMapExt, Service
 pub struct Server {
     listener: TcpListener,
     connection_map: ConnectionMap,
-    // device_map: DeviceMap,
 }
 
 #[derive(Clone, Debug)]
@@ -35,7 +34,7 @@ pub struct ConnectionMap {
 }
 
 impl Server {
-    pub async fn new(port: u16, device_map: DeviceMap) -> Result<Self> {
+    pub async fn new(port: u16) -> Result<Self> {
         let listener = TcpListener::bind(format!("localhost:{port}")).await?;
         let client_map = Arc::new(RwLock::new(HashMap::new()));
         let service_map = Arc::new(RwLock::new(HashMap::new()));
