@@ -5,12 +5,15 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.95"
+base64 = "0.22.1"
 bytes = "1.10.0"
 clap = "4.5.27"
+directories = "6.0.0"
 futures = "0.3.31"
 mozdevice = "0.5.4"
 mpd_client = "1.4.1"
 nusb = "0.1.13"
+os_path = "0.8.0"
 sass-rs = "0.2.2"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.138"

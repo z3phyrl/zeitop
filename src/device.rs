@@ -1,8 +1,8 @@
 use crate::config::DeviceConfig;
-use anyhow::Result;
+use anyhow::{Error, Result};
 use futures::stream::{Stream, StreamExt};
-use nusb::{hotplug::HotplugEvent, watch_devices, DeviceId, DeviceInfo};
-use std::path::PathBuf;
+use nusb::{hotplug::HotplugEvent, list_devices, watch_devices, DeviceId, DeviceInfo};
+use os_path::OsPath;
 use tokio::process::Command;
 use tokio::{join, spawn};
 
@@ -50,21 +50,13 @@ async fn is_installed(serial: &str) -> Result<bool> {
     }
 }
 
-async fn install(serial: &str, path: PathBuf) -> Result<()> {
-    adb(serial, ["install", path.to_str().unwrap_or_default()]).await?;
+async fn install(serial: &str, path: OsPath) -> Result<()> {
+    adb(serial, ["install", &path.to_string()]).await?;
     Ok(())
 }
 
-async fn push_cleaner(serial: &str, path: PathBuf) -> Result<()> {
-    adb(
-        serial,
-        [
-            "push",
-            path.to_str().unwrap_or_default(),
-            "/data/local/tmp/",
-        ],
-    )
-    .await?;
+async fn push_cleaner(serial: &str, path: OsPath) -> Result<()> {
+    adb(serial, ["push", &path.to_string(), "/data/local/tmp/"]).await?;
     Ok(())
 }
 
@@ -97,28 +89,20 @@ async fn start_app(serial: &str) -> Result<()> {
 pub struct DeviceHandler {}
 impl DeviceHandler {
     pub async fn new(config: DeviceConfig) -> Result<Self> {
+        let list = list_devices()?;
+        for info in list {
+            DeviceHandler::handle_device(config.clone(), info)
+                .await
+                .unwrap();
+        }
         let mut watch = watch_devices()?;
         spawn(async move {
             loop {
                 match watch.next().await {
                     Some(HotplugEvent::Connected(info)) => {
-                        let Some(serial) = info.serial_number() else {
-                            return;
-                        };
-                        wait_for(serial).await.unwrap();
-                        let _ = join!(reverse(serial, LOCAL_PORT, REMOTE_PORT), async {
-                            if !is_installed(serial).await.is_ok_and(|i| i) {
-                                let _ = join!(
-                                    install(serial, config.app_path.clone()),
-                                    push_cleaner(serial, config.cleaner_path.clone()),
-                                );
-                                let serial = serial.to_owned();
-                                spawn(async move {
-                                    let _ = start_cleaner(&serial).await;
-                                });
-                            }
-                        });
-                        start_app(serial).await.unwrap();
+                        DeviceHandler::handle_device(config.clone(), info)
+                            .await
+                            .unwrap();
                     }
                     Some(HotplugEvent::Disconnected(id)) => {
                         println!("< {id:?}");
@@ -130,5 +114,33 @@ impl DeviceHandler {
             }
         });
         Ok(Self {})
+    }
+    async fn handle_device(config: DeviceConfig, info: DeviceInfo) -> Result<()> {
+        if !(info
+            .interfaces()
+            .filter(|i| i.interface_string().is_some_and(|i| i == "ADB Interface"))
+            .count()
+            > 0)
+        {
+            return Ok(());
+        }
+        let Some(serial) = info.serial_number() else {
+            return Err(Error::msg("No Serial Number"));
+        };
+        wait_for(serial).await?;
+        let _ = join!(reverse(serial, LOCAL_PORT, REMOTE_PORT), async {
+            if !is_installed(serial).await.is_ok_and(|i| i) {
+                let _ = join!(
+                    install(serial, config.app_path.clone()),
+                    push_cleaner(serial, config.cleaner_path.clone()),
+                );
+                let serial = serial.to_owned();
+                spawn(async move {
+                    let _ = start_cleaner(&serial).await;
+                });
+            }
+        });
+        start_app(serial).await?;
+        Ok(())
     }
 }

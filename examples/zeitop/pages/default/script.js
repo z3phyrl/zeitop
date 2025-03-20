@@ -100,6 +100,9 @@ function update_music_state() {
     } ,"music");
 }
 
+z.request("page-assets", "default/mononoki.ttf", (mononoki) => {
+    load_b64_ttf("Mononoki", mononoki);
+}, "init");
 z.request("sysinfo", "user", (user) => {
     document.getElementById("user").innerHTML = user;
 }, "init");
