@@ -63,8 +63,12 @@ impl ClientMapExt for ClientMap {
     async fn remove(&self, serial: Serial, id: u32) -> Result<()> {
         let this = self.clone();
         spawn_blocking(move || {
-            if let Some(mut clients) = this.write().unwrap().remove(&serial) {
+            let mut that = this.write().unwrap();
+            if let Some(clients) = that.get_mut(&serial) {
                 clients.remove(&id);
+                if clients.len() < 1 {
+                    that.remove(&serial);
+                }
                 Ok(())
             } else {
                 Err(Error::msg("Invalid Client Serial"))
