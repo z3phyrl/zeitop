@@ -17,7 +17,7 @@ const music_elapsed_span = document.getElementById("music-elapsed");
 const music_duration_span = document.getElementById("music-duration");
 const music_prev = document.getElementById("music-prev");
 const music_play_pause = document.getElementById("music-play-pause");
-const music_next = document.getElementById("music_next");
+const music_next = document.getElementById("music-next");
 let music_state_playing = false;
 let music_duration = null;
 let music_elapsed = null;
@@ -100,7 +100,7 @@ function update_music_state() {
     } ,"music");
 }
 
-z.request("page-assets", "default/mononoki.ttf", (mononoki) => {
+z.request("page", "default/fonts/mononoki.ttf", (mononoki) => {
     load_b64_ttf("Mononoki", mononoki);
 }, "init");
 z.request("sysinfo", "user", (user) => {
