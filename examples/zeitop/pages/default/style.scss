@@ -1,26 +1,13 @@
-
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #000000;
-  color: #FFFFFF;
-  width: 100svw;
-  height: 100svh;
-  font-size: 2.6vw;
-  font-family: "Mononoki";
-}
-
-#app {
-  width: 100%;
-  height: 100%;
-}
-
 .center {
   display: flex;
+  background-color: #000000;
+  color: #FFFFFF;
+  font-size: 2.6vw;
+  font-family: "Mononoki";
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  width: 100dvw;
+  height: 100dvh;
   gap: 5%;
 }
 

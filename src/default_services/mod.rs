@@ -1,3 +1,4 @@
+pub mod lib;
 pub mod mpd;
 pub mod page;
 pub mod sysinfo;

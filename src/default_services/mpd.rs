@@ -79,8 +79,8 @@ impl DefaultService for MpdService {
                         "currentsong" => {
                             let Ok(Some(currentsong)) = mpd.command(CurrentSong).await else {
                                 let _ = req
-                                    .reply(Reply::Text(
-                                        "!Error Current Song Unavailable".to_string(),
+                                    .reply(Reply::Error(
+                                        "Error Current Song Unavailable",
                                     ))
                                     .await;
                                 continue;
@@ -98,7 +98,7 @@ impl DefaultService for MpdService {
                         "status" => {
                             let Ok(status) = mpd.command(Status).await else {
                                 let _ = req
-                                    .reply(Reply::Text("!Error Status Unavailable".to_string()))
+                                    .reply(Reply::Error("Error Status Unavailable"))
                                     .await;
                                 continue;
                             };
@@ -120,7 +120,7 @@ impl DefaultService for MpdService {
                                 .await;
                         }
                         request => {
-                            let _ = req.reply(Reply::Text("!Invalid Request".to_string())).await;
+                            let _ = req.reply(Reply::Error("Invalid Request")).await;
                             println!("Requested => {request} :: Unavailable");
                         }
                     }

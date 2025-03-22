@@ -15,13 +15,14 @@ use tungstenite::Message;
 pub type ServiceMap = Arc<RwLock<HashMap<String, Service>>>;
 
 pub trait ServiceMapExt {
-    async fn insert(&self, name: String, service: Service) -> Result<()>;
-    async fn get(&self, name: &str) -> Result<Service>;
-    async fn remove(&self, name: &str) -> Result<()>;
+    async fn insert(&self, name: impl Into<String>, service: Service) -> Result<()>;
+    async fn get(&self, name: impl Into<String>) -> Result<Service>;
+    async fn remove(&self, name: impl Into<String>) -> Result<()>;
 }
 
 impl ServiceMapExt for ServiceMap {
-    async fn insert(&self, name: String, service: Service) -> Result<()> {
+    async fn insert(&self, name: impl Into<String>, service: Service) -> Result<()> {
+        let name = name.into();
         let this = self.clone();
         spawn_blocking(move || {
             let mut this = this.write().unwrap();
@@ -34,8 +35,8 @@ impl ServiceMapExt for ServiceMap {
         })
         .await?
     }
-    async fn get(&self, name: &str) -> Result<Service> {
-        let name = String::from(name);
+    async fn get(&self, name: impl Into<String>) -> Result<Service> {
+        let name = name.into();
         let this = self.clone();
         spawn_blocking(move || {
             let this = this.read().unwrap();
@@ -46,9 +47,9 @@ impl ServiceMapExt for ServiceMap {
         })
         .await?
     }
-    async fn remove(&self, name: &str) -> Result<()> {
+    async fn remove(&self, name: impl Into<String>) -> Result<()> {
+        let name = name.into();
         let this = self.clone();
-        let name = String::from(name);
         Ok(spawn_blocking(move || {
             this.write().unwrap().remove(&name);
         })
@@ -284,9 +285,13 @@ pub struct Request {
     pub request: String,
 }
 
-pub enum Reply {
-    Text(String),
+pub enum Reply<T>
+where
+    T: Into<String>,
+{
+    Text(T),
     Binary(Bytes),
+    Error(T),
 }
 
 pub enum BroadcastMessage {
@@ -350,9 +355,13 @@ impl RequestService {
 // TODO::impl Stream and StreamExt instead
 
 impl Request {
-    pub async fn reply(&self, reply: Reply) -> Result<()> {
+    pub async fn reply<T>(&self, reply: Reply<T>) -> Result<()>
+    where
+        T: Into<String>,
+    {
         match reply {
             Reply::Text(reply) => {
+                let reply = reply.into();
                 self.reply_channel.send(Message::text(format!(
                     "{}@{}&{}{}::{}",
                     self.info.serial, self.info.id, self.request, self.tag, reply
@@ -360,6 +369,14 @@ impl Request {
             }
             Reply::Binary(bytes) => {
                 unimplemented!()
+            }
+            Reply::Error(e) => {
+                let e = e.into();
+                println!("heh => {e}");
+                self.reply_channel.send(Message::text(format!(
+                    "{}@{}&{}{}::!{}",
+                    self.info.serial, self.info.id, self.request, self.tag, e
+                )))?;
             }
         }
         Ok(())

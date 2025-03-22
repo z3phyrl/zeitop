@@ -54,7 +54,7 @@ impl DefaultService for SysInfoService {
                             let _ = req.reply(Reply::Text(System::uptime().to_string())).await;
                         }
                         request => {
-                            let _ = req.reply(Reply::Text("!Invalid Request".to_string())).await;
+                            let _ = req.reply(Reply::Error("Invalid Request".to_string())).await;
                             println!("Requested => {request} :: Unavailable");
                         }
                     }

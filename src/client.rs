@@ -20,13 +20,14 @@ use tungstenite::Message;
 pub type ClientMap = Arc<RwLock<HashMap<Serial, BTreeMap<u32, Client>>>>;
 
 pub trait ClientMapExt {
-    async fn insert(&self, serial: Serial, client: Client) -> Result<u32>;
-    async fn get(&self, serial: Serial, id: u32) -> Option<Client>;
-    async fn remove(&self, serial: Serial, id: u32) -> Result<()>;
+    async fn insert(&self, serial: impl Into<Serial>, client: Client) -> Result<u32>;
+    async fn get(&self, serial: impl Into<Serial>, id: u32) -> Option<Client>;
+    async fn remove(&self, serial: impl Into<Serial>, id: u32) -> Result<()>;
 }
 
 impl ClientMapExt for ClientMap {
-    async fn insert(&self, serial: Serial, client: Client) -> Result<u32> {
+    async fn insert(&self, serial: impl Into<Serial>, client: Client) -> Result<u32> {
+        let serial = serial.into();
         let this = self.clone();
         spawn_blocking(move || {
             let mut this = this.write().unwrap();
@@ -44,7 +45,8 @@ impl ClientMapExt for ClientMap {
         })
         .await?
     }
-    async fn get(&self, serial: Serial, id: u32) -> Option<Client> {
+    async fn get(&self, serial: impl Into<Serial>, id: u32) -> Option<Client> {
+        let serial = serial.into();
         let this = self.clone();
         if let Ok(client) = spawn_blocking(move || {
             if let Some(clients) = this.read().unwrap().get(&serial) {
@@ -60,7 +62,8 @@ impl ClientMapExt for ClientMap {
             None
         }
     }
-    async fn remove(&self, serial: Serial, id: u32) -> Result<()> {
+    async fn remove(&self, serial: impl Into<String>, id: u32) -> Result<()> {
+        let serial = serial.into();
         let this = self.clone();
         spawn_blocking(move || {
             let mut that = this.write().unwrap();
@@ -103,7 +106,7 @@ impl ClientHandler {
     pub async fn new(client: Client, connection_map: ConnectionMap) -> Result<Self> {
         let id = connection_map
             .client_map
-            .insert(client.serial.clone(), client.clone())
+            .insert(&client.serial, client.clone())
             .await?;
         Ok(Self {
             client,
@@ -129,7 +132,7 @@ impl ClientHandler {
                 if self
                     .connection_map
                     .client_map
-                    .remove(self.client.serial.clone(), self.id)
+                    .remove(&self.client.serial, self.id)
                     .await
                     .is_ok()
                 {

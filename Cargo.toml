@@ -1,7 +1,7 @@
 [package]
 name = "zeitop"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 anyhow = "1.0.95"
@@ -10,6 +10,7 @@ bytes = "1.10.0"
 clap = "4.5.27"
 directories = "6.0.0"
 futures = "0.3.31"
+include_dir = "0.7.4"
 mozdevice = "0.5.4"
 mpd_client = "1.4.1"
 nusb = "0.1.13"

@@ -9,7 +9,7 @@ mod service;
 
 use config::{Config, DeviceConfig};
 use default_services::{
-    mpd::MpdService, page::PageService, sysinfo::SysInfoService,
+    mpd::MpdService, page::PageService, sysinfo::SysInfoService, lib::LibService,
     DefaultService,
 };
 use device::DeviceHandler;
@@ -36,6 +36,7 @@ async fn main() -> Result<()> {
 
 async fn run_default_service() -> Result<()> {
     let _ = join!(
+        LibService::run(),
         PageService::run(),
         SysInfoService::run(),
         MpdService::run()

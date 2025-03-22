@@ -79,7 +79,7 @@ impl Server {
                         if let Some(service) = Service::from_req(req.as_str(), &connection)? {
                             if let Err(e) = connection_map
                                 .service_map
-                                    .insert(service.name.clone(), service.clone())
+                                    .insert(&service.name, service.clone())
                                     .await
                             {
                                 service.send(format!("!{e}").into())?;

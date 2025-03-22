@@ -1,23 +1,23 @@
 let z = zeitop;
 
-const hour = document.getElementById("hour");
-const min = document.getElementById("min");
+const hour = page.getElementById("hour");
+const min = page.getElementById("min");
 
-const cpu_bar = document.getElementById("cpu-bar");
-const cpu_percent = document.getElementById("cpu-percent");
-const mem_bar = document.getElementById("mem-bar");
-const mem_val = document.getElementById("mem-val");
+const cpu_bar = page.getElementById("cpu-bar");
+const cpu_percent = page.getElementById("cpu-percent");
+const mem_bar = page.getElementById("mem-bar");
+const mem_val = page.getElementById("mem-val");
 let uptime = 0;
 let total_mem = null;
 
-const music_title = document.getElementById("title");
-const music_artists = document.getElementById("artists");
-const music_bar = document.getElementById("music-bar");
-const music_elapsed_span = document.getElementById("music-elapsed");
-const music_duration_span = document.getElementById("music-duration");
-const music_prev = document.getElementById("music-prev");
-const music_play_pause = document.getElementById("music-play-pause");
-const music_next = document.getElementById("music-next");
+const music_title = page.getElementById("title");
+const music_artists = page.getElementById("artists");
+const music_bar = page.getElementById("music-bar");
+const music_elapsed_span = page.getElementById("music-elapsed");
+const music_duration_span = page.getElementById("music-duration");
+const music_prev = page.getElementById("music-prev");
+const music_play_pause = page.getElementById("music-play-pause");
+const music_next = page.getElementById("music-next");
 let music_state_playing = false;
 let music_duration = null;
 let music_elapsed = null;
@@ -29,7 +29,7 @@ function set_time() {
 }
 
 function set_uptime() {
-    document.getElementById("uptime").innerHTML = ("" + Math.floor(uptime / 3600)).padStart(2, "0") + ":" + ("" + (Math.floor(uptime / 60) % 60)).padStart(2, "0") + ":" + ("" + (uptime % 60)).padStart(2, "0");
+    page.getElementById("uptime").innerHTML = ("" + Math.floor(uptime / 3600)).padStart(2, "0") + ":" + ("" + (Math.floor(uptime / 60) % 60)).padStart(2, "0") + ":" + ("" + (uptime % 60)).padStart(2, "0");
 }
 
 function update_bar(bar, percent) {
@@ -66,6 +66,7 @@ function mem() {
 }
 
 function bar_init(bar, width) {
+    console.log(bar);
     for (let k = 0; k < (bar.offsetWidth / (width)); k++) {
         bar.appendChild(document.createElement("div"));
     }
@@ -100,14 +101,12 @@ function update_music_state() {
     } ,"music");
 }
 
-z.request("page", "default/fonts/mononoki.ttf", (mononoki) => {
-    load_b64_ttf("Mononoki", mononoki);
-}, "init");
+page.load_ttf("Mononoki", "fonts/mononoki.ttf");
 z.request("sysinfo", "user", (user) => {
-    document.getElementById("user").innerHTML = user;
+    page.getElementById("user").innerHTML = user;
 }, "init");
 z.request("sysinfo", "host", (host) => {
-    document.getElementById("host").innerHTML = host;
+    page.getElementById("host").innerHTML = host;
 }, "init");
 z.request("sysinfo", "uptime", (up_time) => {
     uptime += parseInt(up_time);
@@ -128,7 +127,7 @@ bar_init(cpu_bar, 6);
 bar_init(mem_bar, 6);
 bar_init(music_bar, 6);
 
-setInterval(() => {
+function update() {
     set_time()
     uptime += 1;
     set_uptime()
@@ -140,9 +139,11 @@ setInterval(() => {
         }
     }
     update_music();
-}, 1000);
+}
 
-set_time(); 
+setInterval(() => {
+    update();
+}, 1000);
 
 z.subscribe("mpd-events", (subsystem) => {
     update_music_state();
@@ -164,3 +165,5 @@ music_next.addEventListener("click", () => {
     z.request("mpd", "next", (ok) => {
     }, "music-control")
 });
+
+update();
