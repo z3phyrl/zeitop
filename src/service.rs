@@ -203,15 +203,17 @@ impl ConnectionIO for RequestHandler {
 
 pub struct BroadcastHandler {
     service: Service,
+    tag: String,
     client: Client,
     connection_map: ConnectionMap,
 }
 
 impl BroadcastHandler {
-    pub fn new(service: Service, client: Client, connection_map: ConnectionMap) -> Result<Self> {
+    pub fn new(service: Service, tag: String, client: Client, connection_map: ConnectionMap) -> Result<Self> {
         if let ServiceType::Broadcast = service.service_type {
             Ok(Self {
                 service,
+                tag,
                 client,
                 connection_map,
             })
@@ -237,7 +239,7 @@ impl BroadcastHandler {
             Ok(Message::Text(req)) => {
                 if self
                     .client
-                    .send(format!("{}::{}", self.service.name, req.as_str()).into())
+                    .send(format!("{}{}::{}", self.service.name, self.tag, req.as_str()).into())
                     .is_err()
                 {
                     return Err(Error::msg("Can not send"));

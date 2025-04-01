@@ -178,6 +178,7 @@ impl ClientHandler {
                         ServiceType::Broadcast => {
                             let Ok(mut handler) = BroadcastHandler::new(
                                 service,
+                                tag,
                                 self.client.clone(),
                                 self.connection_map.clone(),
                             ) else {

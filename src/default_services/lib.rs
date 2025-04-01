@@ -16,14 +16,15 @@ impl DefaultService for LibService {
         spawn(async move {
             loop {
                 if let Some(req) = lib.next().await {
-                    let lib = if let Some(lib) =
+                    let lib_path = lib_path.join(format!("{}.js", &req.request));
+                    let lib = if lib_path.exists() {
+                        read_to_string(lib_path.join(format!("{}.js", &req.request)))
+                            .await
+                            .unwrap_or_default()
+                    } else if let Some(lib) =
                         DEFAULT_SERVICES_LIBS.get_file(format!("{}.js", &req.request))
                     {
                         lib.contents_utf8().unwrap_or_default().to_string()
-                    } else if let Ok(lib) =
-                        read_to_string(lib_path.join(format!("{}.js", &req.request))).await
-                    {
-                        lib
                     } else {
                         let _ = req.reply(Reply::Error("Invalid Path")).await;
                         continue;
