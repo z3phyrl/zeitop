@@ -14,6 +14,7 @@ include_dir = "0.7.4"
 mozdevice = "0.5.4"
 mpd_client = "1.4.1"
 nusb = "0.1.13"
+obws = "0.14.0"
 os_path = "0.8.0"
 sass-rs = "0.2.2"
 serde = { version = "1.0.217", features = ["derive"] }

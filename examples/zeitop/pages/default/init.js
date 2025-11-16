@@ -146,6 +146,7 @@ setInterval(() => {
 }, 1000);
 
 z.subscribe("mpd-events", (subsystem) => {
+    dbg(mpd_status);
     update_music_state();
     z.request("mpd", "currentsong", (currentsong) => {
         currentsong = JSON.parse(currentsong);
@@ -162,6 +163,7 @@ music_play_pause.addEventListener("click", () => {
     }, "music-control")
 });
 music_next.addEventListener("click", () => {
+    dbg("Hello");
     z.request("mpd", "next", (ok) => {
     }, "music-control")
 });

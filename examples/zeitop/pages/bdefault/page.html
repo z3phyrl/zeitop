@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Zeitop macro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        /* ===== FONT SETUP ===== */
+        @font-face {
+            font-family: "Mononoki";
+            src: url("mononoki-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "Mononoki";
+            src: url("mononoki-Bold.ttf") format("truetype");
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        /* ===== GLOBAL ===== */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            background: #000;
+            color: #fff;
+            font-family: "Mononoki", monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* MAIN WRAPPER */
+        .shell {
+            width: min(95vw, 1300px);
+            padding: clamp(12px, 1.8vw, 18px);
+            border-radius: 18px;
+            border: 1px solid #444;
+            background: radial-gradient(circle at top left, #151515 0, #050505 45%, #000 100%);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .header-title {
+            font-size: clamp(16px, 1.6vw, 20px);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .header-sub {
+            font-size: clamp(9px, 1vw, 11px);
+            color: #888;
+        }
+
+        /* FRAME */
+        .pad-frame {
+            width: 100%;
+            aspect-ratio: 20 / 9;
+            border-radius: 16px;
+            border: 1px solid #333;
+            padding: clamp(10px, 1.2vw, 14px);
+            display: flex;
+            background: radial-gradient(circle at top, #111 0, #050505 50%, #000 100%);
+        }
+
+        .pad-inner {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1.25fr 2fr;
+            gap: clamp(12px, 1.8vw, 20px);
+        }
+
+        /* LEFT SIDE */
+        .pad-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: clamp(14px, 2vw, 20px);
+        }
+
+        /* SLIDERS */
+        .sliders-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: clamp(14px, 2vw, 24px);
+            flex-wrap: wrap;
+        }
+
+        .slider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-label {
+            font-size: clamp(9px, 0.9vw, 11px);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            margin-bottom: 2px;
+        }
+
+        .slider-card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-wrap {
+            position: relative;
+            width: clamp(42px, 5vw, 60px);
+            height: clamp(140px, 28vh, 220px);
+            background: #101010;
+            border-radius: 20px;
+            border: 1px solid #444;
+            padding: clamp(6px, 0.8vw, 8px) clamp(8px, 1vw, 10px);
+            overflow: hidden;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
+        }
+
+        .slider-track {
+            position: absolute;
+            left: 50%;
+            top: clamp(10px, 1.1vh, 16px);
+            bottom: clamp(10px, 1.1vh, 16px);
+            width: 4px;
+            transform: translateX(-50%);
+            background: #000;
+            border-radius: 999px;
+            box-shadow:
+                0 0 4px rgba(255, 255, 255, 0.05),
+                0 0 0 1px #111;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            left: 50%;
+            width: clamp(32px, 4vw, 46px);
+            height: clamp(10px, 1.6vh, 14px);
+            border-radius: 999px;
+            background: #f5f5f5;
+            border: 1px solid #fff;
+            box-shadow:
+                0 0 0 1px #000 inset,
+                0 2px 4px rgba(0, 0, 0, 0.7);
+            transform: translateX(-50%);
+            cursor: pointer;
+            top: 0;
+        }
+
+        .slider-value {
+            font-size: clamp(9px, 0.9vw, 11px);
+            color: #ccc;
+        }
+
+        /* DISPLAY PANEL */
+        .display {
+            border-radius: 12px;
+            border: 1px solid #333;
+            padding: clamp(8px, 1.2vw, 12px);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 1.2vw, 12px);
+            background: linear-gradient(135deg, #080808 0, #050505 50%, #020202 100%);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .display-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(8px, 1.2vw, 12px);
+        }
+
+        /* SYSTEM METERS */
+        .system-label {
+            font-size: clamp(8px, 0.9vw, 10px);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: #fff;
+        }
+
+        .system-meters {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .meter {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .meter-label {
+            font-size: clamp(8px, 0.9vw, 10px);
+            color: #fff;
+        }
+
+        .meter-bar {
+            position: relative;
+            height: clamp(4px, 0.7vh, 6px);
+            border-radius: 999px;
+            background: #111;
+            overflow: hidden;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .meter-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: #fff;
+        }
+
+        .meter-value {
+            font-size: clamp(8px, 0.9vw, 10px);
+            color: #fff;
+            align-self: flex-end;
+        }
+
+        /* TRACK INFO */
+        .track-main {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .track-title {
+            font-size: clamp(11px, 1.2vw, 13px);
+            color: #fff;
+        }
+
+        .track-artist {
+            font-size: clamp(9px, 1vw, 11px);
+            color: #fff;
+        }
+
+        /* PLAYER BOTTOM */
+        .track-progress {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .progress-bar {
+            position: relative;
+            height: clamp(4px, 0.7vh, 6px);
+            border-radius: 999px;
+            background: #111;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: #fff;
+        }
+
+        .progress-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(8px, 0.9vw, 10px);
+            color: #fff;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-btn {
+            border: 1px solid #333;
+            background: #050505;
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: clamp(9px, 1vw, 11px);
+            color: #eee;
+            cursor: pointer;
+            min-width: clamp(26px, 3vw, 32px);
+            transition:
+                0.12s background ease,
+                0.12s transform ease,
+                0.12s border-color ease;
+        }
+
+        .player-btn:hover {
+            background: #111;
+            border-color: #555;
+        }
+
+        .player-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .player-btn-main {
+            padding-inline: clamp(8px, 1.2vw, 10px);
+        }
+
+        /* RIGHT SIDE */
+        .pad-right {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 1.2vw, 10px);
+        }
+
+        .keys-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(9px, 1vw, 11px);
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+        }
+
+        .key-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: clamp(8px, 1.2vw, 10px);
+        }
+
+        /* MACRO KEY */
+        .key {
+            border: 1px solid #333;
+            border-radius: 12px;
+            background: #0a0a0a;
+            padding: clamp(8px, 1.2vw, 10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+            transition:
+                transform 0.14s cubic-bezier(0.22, 0.61, 0.36, 1),
+                box-shadow 0.14s cubic-bezier(0.22, 0.61, 0.36, 1),
+                background 0.14s ease,
+                border-color 0.14s ease;
+        }
+
+        .key:hover {
+            background: #111;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.85);
+        }
+
+        .key.pressed {
+            transform: translateY(2px) scale(0.97);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .key.drag-over {
+            border-color: #fff;
+            box-shadow: 0 0 0 1px #fff;
+        }
+
+        /* ICON BOX */
+        .key-icon {
+            width: clamp(70px, 10vw, 128px);
+            height: clamp(70px, 10vw, 128px);
+            border-radius: 20px;
+            border: 1px solid currentColor;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        /* MICRO LABEL */
+        .key-text {
+            margin-top: 8px;
+            font-size: clamp(9px, 1vw, 11px);
+            color: #fff;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: clamp(9px, 1vw, 11px);
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* RESPONSIVE STACKING */
+        @media (max-width: 900px) {
+            .pad-inner {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .pad-frame {
+                aspect-ratio: auto;
+            }
+
+            .key-grid {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(4, auto);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div class="header">
+            <div class="header-title">Zeitop macro</div>
+            <div class="header-sub">OBS deck • 12 slots</div>
+        </div>
+
+        <div class="pad-frame">
+            <div class="pad-inner">
+
+                <!-- LEFT SIDE -->
+                <section class="pad-left">
+                    <div class="sliders-row">
+                        <div class="slider">
+                            <div class="slider-label">MASTER</div>
+                            <div class="slider-card">
+                                <div class="slider-wrap" id="slider-master">
+                                    <div class="slider-track"></div>
+                                    <div class="slider-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="slider-value" id="slider-master-value">70%</div>
+                        </div>
+
+                        <div class="slider">
+                            <div class="slider-label">AUX</div>
+                            <div class="slider-card">
+                                <div class="slider-wrap" id="slider-aux">
+                                    <div class="slider-track"></div>
+                                    <div class="slider-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="slider-value" id="slider-aux-value">40%</div>
+                        </div>
+
+                        <div class="slider">
+                            <div class="slider-label">MIC</div>
+                            <div class="slider-card">
+                                <div class="slider-wrap" id="slider-mic">
+                                    <div class="slider-track"></div>
+                                    <div class="slider-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="slider-value" id="slider-mic-value">55%</div>
+                        </div>
+
+                        <div class="slider">
+                            <div class="slider-label">SYS</div>
+                            <div class="slider-card">
+                                <div class="slider-wrap" id="slider-sys">
+                                    <div class="slider-track"></div>
+                                    <div class="slider-thumb"></div>
+                                </div>
+                            </div>
+                            <div class="slider-value" id="slider-sys-value">30%</div>
+                        </div>
+                    </div>
+
+                    <!-- DISPLAY PANEL -->
+                    <div class="display">
+                        <!-- SYSTEM ROW -->
+                        <div class="display-row">
+                            <div class="system-label">SYSTEM</div>
+                            <div class="system-meters">
+                                <div class="meter">
+                                    <span class="meter-label">CPU</span>
+                                    <div class="meter-bar">
+                                        <div class="meter-fill" id="cpu-fill"></div>
+                                    </div>
+                                    <span class="meter-value" id="cpu-value">--%</span>
+                                </div>
+                                <div class="meter">
+                                    <span class="meter-label">RAM</span>
+                                    <div class="meter-bar">
+                                        <div class="meter-fill" id="ram-fill"></div>
+                                    </div>
+                                    <span class="meter-value" id="ram-value">--%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TRACK INFO -->
+                        <div class="display-row track-main">
+                            <div class="track-title" id="track-title">No music</div>
+                            <div class="track-artist" id="track-artist">Waiting for API…</div>
+                        </div>
+
+                        <!-- PLAYER -->
+                        <div class="display-row player-bottom">
+                            <div class="track-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="track-progress-fill"></div>
+                                </div>
+                                <div class="progress-time">
+                                    <span id="track-current">0:00</span>
+                                    <span id="track-duration">0:00</span>
+                                </div>
+                            </div>
+                            <div class="player-controls">
+                                <button class="player-btn" id="btn-prev">⏮</button>
+                                <button class="player-btn player-btn-main" id="btn-play">▶</button>
+                                <button class="player-btn" id="btn-next">⏭</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RIGHT SIDE -->
+                <section class="pad-right">
+                    <div class="keys-header">
+                        <span>macros</span>
+                        <span>OBS profile</span>
+                    </div>
+                    <div class="key-grid" id="key-grid"></div>
+                </section>
+
+            </div>
+        </div>
+
+        <div class="footer">Zeitop macro • OBS deck</div>
+    </div>
+
+</body>
+
+</html>

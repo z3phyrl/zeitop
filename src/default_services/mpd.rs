@@ -1,10 +1,10 @@
 use super::DefaultService;
 use anyhow::Result;
 use mpd_client::{
+    Client,
     client::ConnectionEvent,
     commands::{CurrentSong, Next, Play, Previous, SetPause, Status},
     tag::Tag,
-    Client,
 };
 use serde::Serialize;
 use serde_json::to_string;
@@ -79,9 +79,7 @@ impl DefaultService for MpdService {
                         "currentsong" => {
                             let Ok(Some(currentsong)) = mpd.command(CurrentSong).await else {
                                 let _ = req
-                                    .reply(Reply::Error(
-                                        "Error Current Song Unavailable",
-                                    ))
+                                    .reply(Reply::Error("Error Current Song Unavailable"))
                                     .await;
                                 continue;
                             };
@@ -97,9 +95,7 @@ impl DefaultService for MpdService {
                         }
                         "status" => {
                             let Ok(status) = mpd.command(Status).await else {
-                                let _ = req
-                                    .reply(Reply::Error("Error Status Unavailable"))
-                                    .await;
+                                let _ = req.reply(Reply::Error("Error Status Unavailable")).await;
                                 continue;
                             };
                             let statusser = StatusSer {
@@ -131,8 +127,10 @@ impl DefaultService for MpdService {
             loop {
                 match event.next().await {
                     Some(ConnectionEvent::SubsystemChange(subsystem)) => {
-                        let _ =
-                            mpdevents.broadcast(BroadcastMessage::Text(format!("{subsystem:?}"))).await;
+                        println!("{subsystem:?}");
+                        let _ = mpdevents
+                            .broadcast(BroadcastMessage::Text(format!("{subsystem:?}")))
+                            .await;
                     }
                     Some(ConnectionEvent::ConnectionClosed(e)) => {
                         eprintln!("{e}");

@@ -16,6 +16,8 @@ use device::DeviceHandler;
 use server::Server;
 use tokio::join;
 
+use crate::default_services::{obs::ObsService, pulse::PulseAudioService};
+
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Hello, world!");
@@ -39,7 +41,9 @@ async fn run_default_service() -> Result<()> {
         LibService::run(),
         PageService::run(),
         SysInfoService::run(),
-        MpdService::run()
+        MpdService::run(),
+        ObsService::run(),
+        PulseAudioService::run()
     );
     Ok(())
 }
